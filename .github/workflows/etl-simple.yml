@@ -29,12 +29,18 @@ jobs:
       run: |
         pip install -r requirements.txt
     
-    - name: 📥 Check for existing database
+    - name: 📥 Check for existing database and logs
       run: |
         if [ -f data/etl.db ]; then
           echo "✅ Base de datos encontrada en el repositorio"
         else
           echo "ℹ️ No hay base de datos previa, se creará una nueva"
+        fi
+        if [ -f data/etl.log ]; then
+          echo "✅ Log anterior encontrado en el repositorio"
+          echo "📊 Tamaño del log: $(wc -l < data/etl.log) líneas"
+        else
+          echo "ℹ️ No hay log previo, se creará uno nuevo"
         fi
     
     - name: 🔍 Check database status
@@ -67,17 +73,17 @@ jobs:
           sqlite3 data/etl.db "SELECT COUNT(*) as total_runs, MAX(run_ts) as last_run FROM etl_monitor;" || echo "Error consultando etl_monitor"
         fi
     
-    - name: 💾 Commit updated database
+    - name: 💾 Commit updated database and logs
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add data/etl.db
+        git add data/etl.db data/etl.log
         if git diff --staged --quiet; then
-          echo "📝 No hay cambios en la base de datos para commitear"
+          echo "📝 No hay cambios en la base de datos o logs para commitear"
         else
-          git commit -m "update: Actualizar etl.db con métricas de ejecución $(date -u +%Y-%m-%d_%H:%M:%S)"
+          git commit -m "update: Actualizar etl.db y etl.log con ejecución $(date -u +%Y-%m-%d_%H:%M:%S)"
           git push
-          echo "✅ Base de datos actualizada y pusheada al repositorio"
+          echo "✅ Base de datos y logs actualizados y pusheados al repositorio"
         fi
     
     - name: 💾 Upload database (persistent)
