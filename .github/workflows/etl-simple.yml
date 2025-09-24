@@ -2,9 +2,9 @@ name: ETL Pipeline Simple
 
 on:
   schedule:
-    # Diario a las 8:00 AM UTC
-    - cron: '0 8 * * *'
-  workflow_dispatch:
+    # Ejecución diaria al mediodía Colombia (UTC-5)
+    - cron: '0 17 * * *'  # 5:00 PM UTC = 12:00 PM COT (mediodía)
+  workflow_dispatch:  # Permite ejecución manual
   push:
     branches: [ main ]
     paths: ['flows/**', 'data/**']
