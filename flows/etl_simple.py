@@ -16,7 +16,7 @@ import numpy as np
 # Configuración de paths
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 DB_PATH = DATA_DIR / "etl.db"
-FINAL_PARQUET = DATA_DIR / "df_final.parquet"
+FINAL_CSV = DATA_DIR / "df_final.csv"
 LOG_PATH = DATA_DIR / "etl.log"
 
 def setup_logging():
@@ -169,8 +169,8 @@ def transform(df_al, df_ca, df_ma, logger):
         df_final = df_final[columnas_finales]
 
         # Guardar dataset final
-        logger.info(f"Guardando dataset final en: {FINAL_PARQUET}")
-        df_final.to_parquet(FINAL_PARQUET, index=False)
+        logger.info(f"Guardando dataset final en: {FINAL_CSV}")
+        df_final.to_csv(FINAL_CSV, index=False)
         
         # Estadísticas finales
         promedio_general = df_final['nota'].mean() if 'nota' in df_final.columns else 0
