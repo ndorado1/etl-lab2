@@ -1,0 +1,5 @@
+prefect==2.19.9
+pandas>=2.2.0
+pyarrow>=15.0.0
+lxml>=5.2.0
+sqlite-utils>=3.36

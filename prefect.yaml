@@ -1,0 +1,32 @@
+# Prefect deployment configuration
+name: etl-lab2-cloud
+
+# Build configuration
+build: null
+
+# Push configuration  
+push: null
+
+# Pull configuration
+pull:
+- prefect.deployments.steps.set_working_directory:
+    directory: /Users/personal/UAO/ETL/Laboratorio 2/prefect_lab2
+
+# Deployment configurations
+deployments:
+  - name: etl-diario
+    description: "Pipeline ETL Lab2 - Ejecución diaria"
+    tags: ["etl", "lab2", "cloud", "diario"]
+    schedule:
+      cron: "0 8 * * *"
+      timezone: "America/Bogota"
+    entrypoint: flows/etl_lab2_prefect.py:etl_flow
+    # Sin work_pool para plan gratuito
+    
+  - name: etl-test
+    description: "Pipeline ETL Lab2 - Pruebas cada 15 minutos"  
+    tags: ["etl", "lab2", "cloud", "test"]
+    schedule:
+      interval: 900  # 15 minutos en segundos
+    entrypoint: flows/etl_lab2_prefect.py:etl_flow
+    # Sin work_pool para plan gratuito
