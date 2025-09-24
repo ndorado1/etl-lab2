@@ -77,7 +77,15 @@ def extract(logger):
         logger.info(f"Duración: {duration:.2f} segundos")
         logger.info(f"Total registros extraídos: {total_registros}")
         
-        return df_al, df_ca, df_ma
+        # Métricas de extracción
+        extract_metrics = {
+            "alumnos_rows": len(df_al),
+            "calificaciones_rows": len(df_ca),
+            "matriculas_rows": len(df_ma),
+            "total_registros": total_registros
+        }
+        
+        return df_al, df_ca, df_ma, extract_metrics
         
     except Exception as e:
         logger.error(f"ERROR EN EXTRACCIÓN: {str(e)}")
@@ -179,13 +187,22 @@ def transform(df_al, df_ca, df_ma, logger):
         logger.info(f"Materias diferentes: {total_materias_diferentes}")
         logger.info(f"Promedio general de notas: {promedio_general:.2f}")
         
-        return df_final, {
+        # Calcular registros descartados (registros con id_alumno nulo)
+        registros_descartados = 0
+        # En este caso simple, asumimos que no hay registros descartados ya que hacemos left join
+        # pero podríamos calcular los que no tienen match completo
+        
+        transform_metrics = {
             'correos_generados': int(correos_generados),
             'alumnos_con_matricula': int(alumnos_unicos_con_matricula),
             'promedio_notas_general': float(promedio_general),
             'total_alumnos_unicos': int(total_alumnos_unicos),
-            'total_materias_diferentes': int(total_materias_diferentes)
+            'total_materias_diferentes': int(total_materias_diferentes),
+            'registros_validos': int(len(df_final)),
+            'registros_descartados': int(registros_descartados)
         }
+        
+        return df_final, transform_metrics
         
     except Exception as e:
         logger.error(f"ERROR EN TRANSFORMACIÓN: {str(e)}")
@@ -227,6 +244,58 @@ def load(df_final, logger):
         logger.error(f"ERROR EN CARGA: {str(e)}")
         raise
 
+def log_run(registros_leidos, registros_validos, registros_descartados, alumnos_con_matricula, 
+           total_alumnos_unicos, total_materias_diferentes, correos_generados, 
+           promedio_notas_general, duracion_s, estado="OK", mensaje="", logger=None):
+    """Registra métricas de la ejecución del ETL en la tabla etl_monitor"""
+    try:
+        ts_now = datetime.utcnow().isoformat(timespec="seconds")
+        
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        
+        # Crear tabla etl_monitor si no existe
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS etl_monitor (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_ts TEXT,
+                registros_leidos INTEGER,
+                registros_validos INTEGER,
+                registros_descartados INTEGER,
+                alumnos_con_matricula INTEGER,
+                total_alumnos_unicos INTEGER,
+                total_materias_diferentes INTEGER,
+                correos_generados INTEGER,
+                promedio_notas_general REAL,
+                duracion_s TEXT,
+                estado TEXT,
+                mensaje TEXT
+            );
+        """)
+        conn.commit()
+        
+        # Insertar métricas de la corrida actual
+        cur.execute("""
+            INSERT INTO etl_monitor(run_ts, registros_leidos, registros_validos, registros_descartados, 
+                                  alumnos_con_matricula, total_alumnos_unicos, total_materias_diferentes, 
+                                  correos_generados, promedio_notas_general, duracion_s, estado, mensaje)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (ts_now, int(registros_leidos), int(registros_validos), int(registros_descartados), 
+              int(alumnos_con_matricula), int(total_alumnos_unicos), int(total_materias_diferentes), 
+              int(correos_generados), float(promedio_notas_general), str(duracion_s), estado, mensaje[:500]))
+        
+        conn.commit()
+        conn.close()
+        
+        if logger:
+            logger.info(f"Métricas registradas en tabla etl_monitor: {estado}")
+            
+    except Exception as e:
+        if logger:
+            logger.error(f"Error al registrar métricas en etl_monitor: {str(e)}")
+        else:
+            print(f"Error al registrar métricas en etl_monitor: {str(e)}")
+
 def main():
     """Función principal del ETL"""
     flow_start = datetime.utcnow()
@@ -239,10 +308,10 @@ def main():
     
     try:
         logger.info("📥 Ejecutando fase de EXTRACCIÓN")
-        df_al, df_ca, df_ma = extract(logger)
+        df_al, df_ca, df_ma, extract_metrics = extract(logger)
         
         logger.info("🔄 Ejecutando fase de TRANSFORMACIÓN")
-        df_final, metrics = transform(df_al, df_ca, df_ma, logger)
+        df_final, transform_metrics = transform(df_al, df_ca, df_ma, logger)
         
         logger.info("💾 Ejecutando fase de CARGA")
         registros_cargados = load(df_final, logger)
@@ -250,13 +319,30 @@ def main():
         flow_end = datetime.utcnow()
         total_duration = (flow_end - flow_start).total_seconds()
         
+        # Registrar métricas en tabla etl_monitor
+        logger.info("📊 Registrando métricas de ejecución")
+        log_run(
+            registros_leidos=extract_metrics['total_registros'],
+            registros_validos=transform_metrics['registros_validos'],
+            registros_descartados=transform_metrics['registros_descartados'],
+            alumnos_con_matricula=transform_metrics['alumnos_con_matricula'],
+            total_alumnos_unicos=transform_metrics['total_alumnos_unicos'],
+            total_materias_diferentes=transform_metrics['total_materias_diferentes'],
+            correos_generados=transform_metrics['correos_generados'],
+            promedio_notas_general=transform_metrics['promedio_notas_general'],
+            duracion_s=round(total_duration, 2),
+            estado="OK",
+            mensaje="ETL ejecutado exitosamente",
+            logger=logger
+        )
+        
         logger.info("✅ ========================================")
         logger.info("✅ PIPELINE ETL COMPLETADO EXITOSAMENTE")
         logger.info("✅ ========================================")
         logger.info(f"✅ Duración total: {total_duration:.2f} segundos")
         logger.info(f"✅ Registros procesados: {len(df_final)}")
-        logger.info(f"✅ Alumnos únicos: {metrics['total_alumnos_unicos']}")
-        logger.info(f"✅ Correos generados: {metrics['correos_generados']}")
+        logger.info(f"✅ Alumnos únicos: {transform_metrics['total_alumnos_unicos']}")
+        logger.info(f"✅ Correos generados: {transform_metrics['correos_generados']}")
         logger.info(f"✅ Timestamp de finalización: {flow_end.isoformat()}")
         
         # Resumen final - convertir todos los valores a tipos Python nativos
@@ -264,10 +350,10 @@ def main():
             "duracion_total_segundos": round(float(total_duration), 2),
             "registros_procesados": int(len(df_final)),
             "registros_cargados": int(registros_cargados),
-            "alumnos_unicos": int(metrics['total_alumnos_unicos']),
-            "materias_diferentes": int(metrics['total_materias_diferentes']),
-            "correos_generados": int(metrics['correos_generados']),
-            "promedio_notas_general": round(float(metrics['promedio_notas_general']), 2),
+            "alumnos_unicos": int(transform_metrics['total_alumnos_unicos']),
+            "materias_diferentes": int(transform_metrics['total_materias_diferentes']),
+            "correos_generados": int(transform_metrics['correos_generados']),
+            "promedio_notas_general": round(float(transform_metrics['promedio_notas_general']), 2),
             "estado": "EXITOSO",
             "timestamp": flow_end.isoformat()
         }
@@ -288,6 +374,25 @@ def main():
         logger.error(f"❌ Tipo de error: {type(e).__name__}")
         logger.error(f"❌ Duración hasta el error: {total_duration:.2f} segundos")
         logger.error(f"❌ Timestamp del error: {flow_end.isoformat()}")
+        
+        # Registrar métricas de fallo en etl_monitor
+        try:
+            log_run(
+                registros_leidos=0,
+                registros_validos=0,
+                registros_descartados=0,
+                alumnos_con_matricula=0,
+                total_alumnos_unicos=0,
+                total_materias_diferentes=0,
+                correos_generados=0,
+                promedio_notas_general=0.0,
+                duracion_s=round(total_duration, 2),
+                estado="FAIL",
+                mensaje=f"Error: {str(e)}",
+                logger=logger
+            )
+        except Exception as log_error:
+            logger.error(f"Error adicional al registrar métricas de fallo: {str(log_error)}")
         
         return False
 
