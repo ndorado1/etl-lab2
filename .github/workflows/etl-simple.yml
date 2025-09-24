@@ -12,6 +12,8 @@ on:
 jobs:
   etl-simple:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Permite hacer push al repositorio
     
     steps:
     - name: 🔄 Checkout code
@@ -27,28 +29,17 @@ jobs:
       run: |
         pip install -r requirements.txt
     
-    - name: 📥 Download previous database
-      id: download-db
-      uses: actions/download-artifact@v4
-      with:
-        name: etl-database
-        path: data/
-      continue-on-error: true  # No falla si no existe DB anterior
-    
-    - name: 🔇 Suppress download error message
-      if: steps.download-db.outcome == 'failure'
+    - name: 📥 Check for existing database
       run: |
-        echo "ℹ️ Sin base de datos anterior - esto es normal en la primera ejecución"
+        if [ -f data/etl.db ]; then
+          echo "✅ Base de datos encontrada en el repositorio"
+        else
+          echo "ℹ️ No hay base de datos previa, se creará una nueva"
+        fi
     
     - name: 🔍 Check database status
       run: |
         echo "📊 Estado de la base de datos:"
-        if [ "${{ steps.download-db.outcome }}" = "success" ]; then
-          echo "✅ Artefacto de DB anterior descargado exitosamente"
-        else
-          echo "ℹ️ No hay artefacto de DB anterior (primera ejecución o expirado)"
-        fi
-        
         if [ -f data/etl.db ]; then
           echo "✅ Archivo etl.db encontrado"
           sqlite3 data/etl.db "SELECT COUNT(*) as total_runs FROM etl_monitor;" 2>/dev/null || echo "📝 Tabla etl_monitor será creada"
@@ -74,6 +65,19 @@ jobs:
         if [ -f data/etl.db ]; then
           echo "📈 Registros en etl_monitor:"
           sqlite3 data/etl.db "SELECT COUNT(*) as total_runs, MAX(run_ts) as last_run FROM etl_monitor;" || echo "Error consultando etl_monitor"
+        fi
+    
+    - name: 💾 Commit updated database
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/etl.db
+        if git diff --staged --quiet; then
+          echo "📝 No hay cambios en la base de datos para commitear"
+        else
+          git commit -m "update: Actualizar etl.db con métricas de ejecución $(date -u +%Y-%m-%d_%H:%M:%S)"
+          git push
+          echo "✅ Base de datos actualizada y pusheada al repositorio"
         fi
     
     - name: 💾 Upload database (persistent)
