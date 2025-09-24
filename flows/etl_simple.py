@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 ETL Pipeline Simple - Sin Prefect para GitHub Actions
-Mantiene toda la funcionalidad original pero sin dependencias complejas
+Versión corregida sin warnings ni errores JSON
 """
 
 from datetime import datetime
@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 import json
 import logging
 from pathlib import Path
+import numpy as np
 
 # Configuración de paths
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -93,9 +94,9 @@ def transform(df_al, df_ca, df_ma, logger):
         # === LIMPIEZA DE DATOS ===
         logger.info("Iniciando limpieza de datos")
         
-        # 1. Eliminar duplicados
+        # 1. Eliminar duplicados - crear copia explícita para evitar warning
         registros_antes = len(df_al)
-        df_al = df_al.drop_duplicates(subset=['id_alumno'], keep='first')
+        df_al = df_al.drop_duplicates(subset=['id_alumno'], keep='first').copy()
         duplicados_eliminados = registros_antes - len(df_al)
         logger.info(f"Duplicados eliminados en alumnos: {duplicados_eliminados}")
         
@@ -116,8 +117,9 @@ def transform(df_al, df_ca, df_ma, logger):
         correos_generados = correos_faltantes_antes - correos_faltantes_despues
         logger.info(f"Correos generados automáticamente: {correos_generados}")
         
-        # 3. Normalizar calificaciones
+        # 3. Normalizar calificaciones - crear copia para evitar warning
         logger.info("Normalizando calificaciones al rango 0-5")
+        df_ca = df_ca.copy()
         calificaciones_fuera_rango = 0
         
         def normalizar_nota(nota):
@@ -178,11 +180,11 @@ def transform(df_al, df_ca, df_ma, logger):
         logger.info(f"Promedio general de notas: {promedio_general:.2f}")
         
         return df_final, {
-            'correos_generados': correos_generados,
-            'alumnos_con_matricula': alumnos_unicos_con_matricula,
-            'promedio_notas_general': promedio_general,
-            'total_alumnos_unicos': total_alumnos_unicos,
-            'total_materias_diferentes': total_materias_diferentes
+            'correos_generados': int(correos_generados),
+            'alumnos_con_matricula': int(alumnos_unicos_con_matricula),
+            'promedio_notas_general': float(promedio_general),
+            'total_alumnos_unicos': int(total_alumnos_unicos),
+            'total_materias_diferentes': int(total_materias_diferentes)
         }
         
     except Exception as e:
@@ -257,15 +259,15 @@ def main():
         logger.info(f"✅ Correos generados: {metrics['correos_generados']}")
         logger.info(f"✅ Timestamp de finalización: {flow_end.isoformat()}")
         
-        # Resumen final
+        # Resumen final - convertir todos los valores a tipos Python nativos
         resumen = {
-            "duracion_total_segundos": round(total_duration, 2),
-            "registros_procesados": len(df_final),
-            "registros_cargados": registros_cargados,
-            "alumnos_unicos": metrics['total_alumnos_unicos'],
-            "materias_diferentes": metrics['total_materias_diferentes'],
-            "correos_generados": metrics['correos_generados'],
-            "promedio_notas_general": round(metrics['promedio_notas_general'], 2),
+            "duracion_total_segundos": round(float(total_duration), 2),
+            "registros_procesados": int(len(df_final)),
+            "registros_cargados": int(registros_cargados),
+            "alumnos_unicos": int(metrics['total_alumnos_unicos']),
+            "materias_diferentes": int(metrics['total_materias_diferentes']),
+            "correos_generados": int(metrics['correos_generados']),
+            "promedio_notas_general": round(float(metrics['promedio_notas_general']), 2),
             "estado": "EXITOSO",
             "timestamp": flow_end.isoformat()
         }
