@@ -1,0 +1,56 @@
+name: ETL Pipeline Simple
+
+on:
+  schedule:
+    # Diario a las 8:00 AM UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths: ['flows/**', 'data/**']
+
+jobs:
+  etl-simple:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔄 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: 🚀 Execute ETL Pipeline
+      run: |
+        echo "🚀 Iniciando ETL Pipeline..."
+        cd flows
+        python etl_lab2_prefect.py
+        echo "✅ Pipeline completado"
+    
+    - name: 📊 Show results
+      run: |
+        echo "📊 Resultados del ETL:"
+        ls -la data/
+        if [ -f data/etl.log ]; then
+          echo "📝 Últimas líneas del log:"
+          tail -20 data/etl.log
+        fi
+    
+    - name: 💾 Upload artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: etl-results-${{ github.run_number }}
+        path: |
+          data/etl.log
+          data/etl.db
+          data/df_final.parquet
+          data/raw_*.csv
+          data/raw_*.json
