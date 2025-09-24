@@ -31,7 +31,7 @@ jobs:
       run: |
         echo "🚀 Iniciando ETL Pipeline..."
         cd flows
-        python etl_lab2_prefect.py
+        python etl_simple.py
         echo "✅ Pipeline completado"
     
     - name: 📊 Show results
