@@ -28,19 +28,32 @@ jobs:
         pip install -r requirements.txt
     
     - name: 📥 Download previous database
+      id: download-db
       uses: actions/download-artifact@v4
       with:
         name: etl-database
         path: data/
       continue-on-error: true  # No falla si no existe DB anterior
     
-    - name: 🔍 Check if database exists
+    - name: 🔇 Suppress download error message
+      if: steps.download-db.outcome == 'failure'
       run: |
-        if [ -f data/etl.db ]; then
-          echo "✅ Base de datos anterior encontrada"
-          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs FROM etl_monitor;" || echo "Tabla etl_monitor no existe aún"
+        echo "ℹ️ Sin base de datos anterior - esto es normal en la primera ejecución"
+    
+    - name: 🔍 Check database status
+      run: |
+        echo "📊 Estado de la base de datos:"
+        if [ "${{ steps.download-db.outcome }}" = "success" ]; then
+          echo "✅ Artefacto de DB anterior descargado exitosamente"
         else
-          echo "ℹ️ No hay base de datos anterior, se creará una nueva"
+          echo "ℹ️ No hay artefacto de DB anterior (primera ejecución o expirado)"
+        fi
+        
+        if [ -f data/etl.db ]; then
+          echo "✅ Archivo etl.db encontrado"
+          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs FROM etl_monitor;" 2>/dev/null || echo "📝 Tabla etl_monitor será creada"
+        else
+          echo "📝 Se creará nueva base de datos etl.db"
         fi
     
     - name: 🚀 Execute ETL Pipeline
