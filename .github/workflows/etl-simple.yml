@@ -27,6 +27,22 @@ jobs:
       run: |
         pip install -r requirements.txt
     
+    - name: 📥 Download previous database
+      uses: actions/download-artifact@v4
+      with:
+        name: etl-database
+        path: data/
+      continue-on-error: true  # No falla si no existe DB anterior
+    
+    - name: 🔍 Check if database exists
+      run: |
+        if [ -f data/etl.db ]; then
+          echo "✅ Base de datos anterior encontrada"
+          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs FROM etl_monitor;" || echo "Tabla etl_monitor no existe aún"
+        else
+          echo "ℹ️ No hay base de datos anterior, se creará una nueva"
+        fi
+    
     - name: 🚀 Execute ETL Pipeline
       run: |
         echo "🚀 Iniciando ETL Pipeline..."
@@ -42,21 +58,34 @@ jobs:
           echo "📝 Últimas líneas del log:"
           tail -20 data/etl.log
         fi
+        if [ -f data/etl.db ]; then
+          echo "📈 Registros en etl_monitor:"
+          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs, MAX(run_ts) as last_run FROM etl_monitor;" || echo "Error consultando etl_monitor"
+        fi
     
-    - name: 💾 Upload artifacts
+    - name: 💾 Upload database (persistent)
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: etl-database
+        path: data/etl.db
+        if-no-files-found: ignore
+        retention-days: 30           # Más tiempo para la DB persistente
+        compression-level: 6
+    
+    - name: 📁 Upload execution results
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: etl-results-${{ github.run_number }}
         path: |
           data/etl.log
-          data/etl.db
-          data/df_final.parquet
+          data/df_final.csv
           data/raw_*.csv
           data/raw_*.json
           
-        if-no-files-found: ignore     # evita fallar si aún no existen
-        retention-days: 7             # 1–90 días
-        compression-level: 0          # más rápido para binarios (sqlite, parquet)  
+        if-no-files-found: ignore
+        retention-days: 7
+        compression-level: 0  
 
 
