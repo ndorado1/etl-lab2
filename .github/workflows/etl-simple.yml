@@ -54,3 +54,9 @@ jobs:
           data/df_final.parquet
           data/raw_*.csv
           data/raw_*.json
+          
+        if-no-files-found: ignore     # evita fallar si aún no existen
+        retention-days: 7             # 1–90 días
+        compression-level: 0          # más rápido para binarios (sqlite, parquet)  
+
+
