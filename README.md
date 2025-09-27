@@ -120,3 +120,8 @@ schedule:
 ## Evidencia de Ejecucion Automatica Exitosa
 
 <img src="images/captura-success.png" alt="Ejecuciones Exitosas" width="600">
+<img src="images/captura-success_2.png" alt="Ejecuciones Exitosas" width="600">
+
+# Evidencia de Ejecucion con Errores
+
+<img src="images/captura-error.png" alt="Ejecuciones Exitosas" width="600">
