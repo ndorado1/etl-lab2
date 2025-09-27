@@ -141,16 +141,10 @@ def transform(df_al, df_ca, df_ma, logger):
         logger.info(f"Calificaciones fuera de rango corregidas: {calificaciones_fuera_rango}")
 
         # === VALIDACIÓN INTENCIONAL DE ERRORES ===
-        # Error intencional para demostrar manejo de errores
-        import random
-        random.seed(datetime.utcnow().day)  # Usar el día para hacer el error predecible
-        
-        if random.random() < 0.3:  # 30% de probabilidad de error
-            error_msg = "Validación de integridad de datos falló - datos inconsistentes detectados"
-            logger.error(f"🚨 {error_msg}")
-            raise ValueError(error_msg)
-        
-        logger.info("✅ Validación de integridad de datos completada exitosamente")
+        # Error forzado para demostrar manejo de errores
+        error_msg = "Validación de integridad de datos falló - datos inconsistentes detectados"
+        logger.error(f"🚨 {error_msg}")
+        raise ValueError(error_msg)
 
         # === MERGES ===
         logger.info("Iniciando proceso de merge de datos")
