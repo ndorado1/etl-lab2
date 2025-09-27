@@ -5,9 +5,9 @@ on:
     # Ejecución diaria al mediodía Colombia (UTC-5)
     - cron: '0 17 * * *'  # 5:00 PM UTC = 12:00 PM COT (mediodía)
   workflow_dispatch:  # Permite ejecución manual
-  push:
-    branches: [ main ]
-    paths: ['flows/**', 'data/**']
+  # push:  # Comentado temporalmente para evitar ejecución automática en push
+  #   branches: [ main ]
+  #   paths: ['flows/**', 'data/**']
 
 jobs:
   etl-simple:

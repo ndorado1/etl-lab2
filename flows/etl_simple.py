@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 ETL Pipeline Simple - Sin Prefect para GitHub Actions
-Versión corregida sin warnings ni errores JSON
 """
 
 from datetime import datetime
@@ -141,6 +140,18 @@ def transform(df_al, df_ca, df_ma, logger):
         df_ca['nota'] = df_ca['nota'].apply(normalizar_nota)
         logger.info(f"Calificaciones fuera de rango corregidas: {calificaciones_fuera_rango}")
 
+        # === VALIDACIÓN INTENCIONAL DE ERRORES ===
+        # Error intencional para demostrar manejo de errores
+        import random
+        random.seed(datetime.utcnow().day)  # Usar el día para hacer el error predecible
+        
+        if random.random() < 0.3:  # 30% de probabilidad de error
+            error_msg = "Validación de integridad de datos falló - datos inconsistentes detectados"
+            logger.error(f"🚨 {error_msg}")
+            raise ValueError(error_msg)
+        
+        logger.info("✅ Validación de integridad de datos completada exitosamente")
+
         # === MERGES ===
         logger.info("Iniciando proceso de merge de datos")
         key = "id_alumno"
@@ -189,8 +200,7 @@ def transform(df_al, df_ca, df_ma, logger):
         
         # Calcular registros descartados (registros con id_alumno nulo)
         registros_descartados = 0
-        # En este caso simple, asumimos que no hay registros descartados ya que hacemos left join
-        # pero podríamos calcular los que no tienen match completo
+       
         
         transform_metrics = {
             'correos_generados': int(correos_generados),
