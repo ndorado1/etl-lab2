@@ -115,4 +115,8 @@ schedule:
 - Fallos en transformaciones de datos
 ---
 
-**Nota**: Este sistema está en producción con ejecución diaria automática. Los datos y métricas se actualizan continuamente en el repositorio para demostrar la funcionalidad completa del pipeline ETL.
+**Nota**: Este sistema está en producción con ejecución diaria automática. Los datos y métricas se actualizan continuamente en el repositorio para demostrar la funcionalidad completa del pipeline ETL. En el registro de ejecuciones de Actions se evidencian ejecuciones manuales y automatizadas.
+
+## Evidencia de Ejecucion Automatica Exitosa
+
+<img src="images/captura-success.png" alt="Ejecuciones Exitosas" width="600">
