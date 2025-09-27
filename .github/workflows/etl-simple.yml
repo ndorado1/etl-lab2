@@ -58,7 +58,7 @@ jobs:
         echo "🚀 Iniciando ETL Pipeline..."
         cd flows
         python etl_simple.py
-        echo "✅ Pipeline completado"
+        echo "✅ Script de pipeline completado (revisar logs para estado del ETL)"
     
     - name: 📊 Show results
       run: |
@@ -69,8 +69,10 @@ jobs:
           tail -20 data/etl.log
         fi
         if [ -f data/etl.db ]; then
-          echo "📈 Registros en etl_monitor:"
-          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs, MAX(run_ts) as last_run FROM etl_monitor;" || echo "Error consultando etl_monitor"
+          echo "📈 Estado de ejecuciones en etl_monitor:"
+          sqlite3 data/etl.db "SELECT COUNT(*) as total_runs, MAX(run_ts) as last_run, estado FROM etl_monitor GROUP BY estado;" || echo "Error consultando etl_monitor"
+          echo "📊 Última ejecución:"
+          sqlite3 data/etl.db "SELECT run_ts, estado, mensaje FROM etl_monitor ORDER BY id DESC LIMIT 1;" || echo "Error consultando última ejecución"
         fi
     
     - name: 💾 Commit updated database and logs
