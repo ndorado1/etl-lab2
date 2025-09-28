@@ -414,3 +414,38 @@
 2025-09-27 17:06:25 | ERROR | main | ❌ Duración hasta el error: 0.01 segundos
 2025-09-27 17:06:25 | ERROR | main | ❌ Timestamp del error: 2025-09-27T17:06:25.929917
 2025-09-27 17:06:25 | INFO | log_run | Métricas registradas en tabla etl_monitor: FAIL
+2025-09-28 17:06:25 | INFO | main | 🚀 ========================================
+2025-09-28 17:06:25 | INFO | main | 🚀 INICIANDO PIPELINE ETL LAB2
+2025-09-28 17:06:25 | INFO | main | 🚀 ========================================
+2025-09-28 17:06:25 | INFO | main | 🚀 Timestamp de inicio: 2025-09-28T17:06:25.154502
+2025-09-28 17:06:25 | INFO | main | 📥 Ejecutando fase de EXTRACCIÓN
+2025-09-28 17:06:25 | INFO | extract | === INICIANDO FASE DE EXTRACCIÓN ===
+2025-09-28 17:06:25 | INFO | extract | Leyendo archivo de alumnos: /home/runner/work/etl-lab2/etl-lab2/data/alumnos.csv
+2025-09-28 17:06:25 | INFO | extract | Alumnos leídos: 9 registros
+2025-09-28 17:06:25 | INFO | extract | Leyendo archivo de calificaciones: /home/runner/work/etl-lab2/etl-lab2/data/calificaciones.json
+2025-09-28 17:06:25 | INFO | extract | Calificaciones leídas: 13 registros
+2025-09-28 17:06:25 | INFO | extract | Leyendo archivo de matrículas: /home/runner/work/etl-lab2/etl-lab2/data/matriculas.xml
+2025-09-28 17:06:25 | INFO | extract | Matrículas leídas: 8 registros
+2025-09-28 17:06:25 | INFO | extract | Generando copias raw de los datos originales
+2025-09-28 17:06:25 | INFO | extract | === EXTRACCIÓN COMPLETADA EXITOSAMENTE ===
+2025-09-28 17:06:25 | INFO | extract | Duración: 0.01 segundos
+2025-09-28 17:06:25 | INFO | extract | Total registros extraídos: 30
+2025-09-28 17:06:25 | INFO | main | 🔄 Ejecutando fase de TRANSFORMACIÓN
+2025-09-28 17:06:25 | INFO | transform | === INICIANDO FASE DE TRANSFORMACIÓN ===
+2025-09-28 17:06:25 | INFO | transform | Datos recibidos - Alumnos: 9, Calificaciones: 13, Matrículas: 8
+2025-09-28 17:06:25 | INFO | transform | Iniciando limpieza de datos
+2025-09-28 17:06:25 | INFO | transform | Duplicados eliminados en alumnos: 1
+2025-09-28 17:06:25 | INFO | transform | Generando correos electrónicos faltantes
+2025-09-28 17:06:25 | INFO | transform | Correos generados automáticamente: 3
+2025-09-28 17:06:25 | INFO | transform | Normalizando calificaciones al rango 0-5
+2025-09-28 17:06:25 | INFO | transform | Calificaciones fuera de rango corregidas: 2
+2025-09-28 17:06:25 | ERROR | transform | 🚨 Validación de integridad de datos falló - datos inconsistentes detectados
+2025-09-28 17:06:25 | ERROR | transform | ERROR EN TRANSFORMACIÓN: Validación de integridad de datos falló - datos inconsistentes detectados
+2025-09-28 17:06:25 | ERROR | main | ❌ ========================================
+2025-09-28 17:06:25 | ERROR | main | ❌ ERROR EN PIPELINE ETL
+2025-09-28 17:06:25 | ERROR | main | ❌ ========================================
+2025-09-28 17:06:25 | ERROR | main | ❌ Error: Validación de integridad de datos falló - datos inconsistentes detectados
+2025-09-28 17:06:25 | ERROR | main | ❌ Tipo de error: ValueError
+2025-09-28 17:06:25 | ERROR | main | ❌ Duración hasta el error: 0.01 segundos
+2025-09-28 17:06:25 | ERROR | main | ❌ Timestamp del error: 2025-09-28T17:06:25.166239
+2025-09-28 17:06:25 | INFO | log_run | Métricas registradas en tabla etl_monitor: FAIL
