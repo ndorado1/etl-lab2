@@ -834,3 +834,73 @@
   "estado": "EXITOSO",
   "timestamp": "2025-10-04T17:06:27.366244"
 }
+2025-10-05 17:06:29 | INFO | main | 🚀 ========================================
+2025-10-05 17:06:29 | INFO | main | 🚀 INICIANDO PIPELINE ETL LAB2
+2025-10-05 17:06:29 | INFO | main | 🚀 ========================================
+2025-10-05 17:06:29 | INFO | main | 🚀 Timestamp de inicio: 2025-10-05T17:06:29.551147
+2025-10-05 17:06:29 | INFO | main | 📥 Ejecutando fase de EXTRACCIÓN
+2025-10-05 17:06:29 | INFO | extract | === INICIANDO FASE DE EXTRACCIÓN ===
+2025-10-05 17:06:29 | INFO | extract | Leyendo archivo de alumnos: /home/runner/work/etl-lab2/etl-lab2/data/alumnos.csv
+2025-10-05 17:06:29 | INFO | extract | Alumnos leídos: 9 registros
+2025-10-05 17:06:29 | INFO | extract | Leyendo archivo de calificaciones: /home/runner/work/etl-lab2/etl-lab2/data/calificaciones.json
+2025-10-05 17:06:29 | INFO | extract | Calificaciones leídas: 13 registros
+2025-10-05 17:06:29 | INFO | extract | Leyendo archivo de matrículas: /home/runner/work/etl-lab2/etl-lab2/data/matriculas.xml
+2025-10-05 17:06:29 | INFO | extract | Matrículas leídas: 8 registros
+2025-10-05 17:06:29 | INFO | extract | Generando copias raw de los datos originales
+2025-10-05 17:06:29 | INFO | extract | === EXTRACCIÓN COMPLETADA EXITOSAMENTE ===
+2025-10-05 17:06:29 | INFO | extract | Duración: 0.01 segundos
+2025-10-05 17:06:29 | INFO | extract | Total registros extraídos: 30
+2025-10-05 17:06:29 | INFO | main | 🔄 Ejecutando fase de TRANSFORMACIÓN
+2025-10-05 17:06:29 | INFO | transform | === INICIANDO FASE DE TRANSFORMACIÓN ===
+2025-10-05 17:06:29 | INFO | transform | Datos recibidos - Alumnos: 9, Calificaciones: 13, Matrículas: 8
+2025-10-05 17:06:29 | INFO | transform | Iniciando limpieza de datos
+2025-10-05 17:06:29 | INFO | transform | Duplicados eliminados en alumnos: 1
+2025-10-05 17:06:29 | INFO | transform | Generando correos electrónicos faltantes
+2025-10-05 17:06:29 | INFO | transform | Correos generados automáticamente: 3
+2025-10-05 17:06:29 | INFO | transform | Normalizando calificaciones al rango 0-5
+2025-10-05 17:06:29 | INFO | transform | Calificaciones fuera de rango corregidas: 2
+2025-10-05 17:06:29 | INFO | transform | ✅ Validación de integridad de datos completada exitosamente
+2025-10-05 17:06:29 | INFO | transform | Iniciando proceso de merge de datos
+2025-10-05 17:06:29 | INFO | transform | Merge calificaciones-alumnos: 13 registros
+2025-10-05 17:06:29 | INFO | transform | Merge final con matrículas: 13 registros
+2025-10-05 17:06:29 | INFO | transform | Registros con matrícula asociada: 13
+2025-10-05 17:06:29 | INFO | transform | Alumnos únicos con matrícula: 8
+2025-10-05 17:06:29 | INFO | transform | Guardando dataset final en: /home/runner/work/etl-lab2/etl-lab2/data/df_final.csv
+2025-10-05 17:06:29 | INFO | transform | === TRANSFORMACIÓN COMPLETADA EXITOSAMENTE ===
+2025-10-05 17:06:29 | INFO | transform | Duración: 0.01 segundos
+2025-10-05 17:06:29 | INFO | transform | Registros procesados: 13
+2025-10-05 17:06:29 | INFO | transform | Alumnos únicos: 8
+2025-10-05 17:06:29 | INFO | transform | Materias diferentes: 3
+2025-10-05 17:06:29 | INFO | transform | Promedio general de notas: 3.62
+2025-10-05 17:06:29 | INFO | main | 💾 Ejecutando fase de CARGA
+2025-10-05 17:06:29 | INFO | load | === INICIANDO FASE DE CARGA ===
+2025-10-05 17:06:29 | INFO | load | Registros a cargar: 13
+2025-10-05 17:06:29 | INFO | load | Conectando a base de datos: /home/runner/work/etl-lab2/etl-lab2/data/etl.db
+2025-10-05 17:06:29 | INFO | load | Cargando datos en tabla 'hechos' (reemplazando contenido anterior)
+2025-10-05 17:06:29 | INFO | load | Verificación: 13 registros en tabla hechos
+2025-10-05 17:06:29 | INFO | load | Conexión a base de datos cerrada
+2025-10-05 17:06:29 | INFO | load | === CARGA COMPLETADA EXITOSAMENTE ===
+2025-10-05 17:06:29 | INFO | load | Duración: 0.01 segundos
+2025-10-05 17:06:29 | INFO | load | Registros cargados: 13
+2025-10-05 17:06:29 | INFO | main | 📊 Registrando métricas de ejecución
+2025-10-05 17:06:29 | INFO | log_run | Métricas registradas en tabla etl_monitor: OK
+2025-10-05 17:06:29 | INFO | main | ✅ ========================================
+2025-10-05 17:06:29 | INFO | main | ✅ PIPELINE ETL COMPLETADO EXITOSAMENTE
+2025-10-05 17:06:29 | INFO | main | ✅ ========================================
+2025-10-05 17:06:29 | INFO | main | ✅ Duración total: 0.02 segundos
+2025-10-05 17:06:29 | INFO | main | ✅ Registros procesados: 13
+2025-10-05 17:06:29 | INFO | main | ✅ Alumnos únicos: 8
+2025-10-05 17:06:29 | INFO | main | ✅ Correos generados: 3
+2025-10-05 17:06:29 | INFO | main | ✅ Timestamp de finalización: 2025-10-05T17:06:29.574232
+2025-10-05 17:06:29 | INFO | main | 📊 RESUMEN FINAL ETL:
+2025-10-05 17:06:29 | INFO | main | {
+  "duracion_total_segundos": 0.02,
+  "registros_procesados": 13,
+  "registros_cargados": 13,
+  "alumnos_unicos": 8,
+  "materias_diferentes": 3,
+  "correos_generados": 3,
+  "promedio_notas_general": 3.62,
+  "estado": "EXITOSO",
+  "timestamp": "2025-10-05T17:06:29.574232"
+}
